@@ -37,6 +37,7 @@ export default function DashboardScreen() {
   const [sleepDialog, setSleepDialog] = useState(false);
   const [bpDialog, setBpDialog] = useState(false);
   const [heartRateDialog, setHeartRateDialog] = useState(false);
+  const [stepsDialog, setStepsDialog] = useState(false);
   
   // Form states
   const [glucose, setGlucose] = useState("");
@@ -45,6 +46,7 @@ export default function DashboardScreen() {
   const [systolic, setSystolic] = useState("");
   const [diastolic, setDiastolic] = useState("");
   const [heartRate, setHeartRate] = useState("");
+  const [steps, setSteps] = useState("");
 
   const { data: latestHealth, isLoading: healthLoading } = useQuery<HealthEntry | null>({
     queryKey: [`/api/health-entries/latest?userId=${user?.uid}`],
@@ -132,6 +134,16 @@ export default function DashboardScreen() {
     });
     setHeartRate("");
     setHeartRateDialog(false);
+  };
+
+  const handleStepsSubmit = () => {
+    if (!steps || !user) return;
+    createEntryMutation.mutate({
+      userId: user.uid,
+      steps: parseInt(steps),
+    });
+    setSteps("");
+    setStepsDialog(false);
   };
 
   // Only use real data from database/integrations - no fake values
@@ -429,25 +441,150 @@ export default function DashboardScreen() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+
+                {/* Steps */}
+                <Dialog open={stepsDialog} onOpenChange={setStepsDialog}>
+                  <DialogTrigger asChild>
+                    <Card className="cursor-pointer hover-elevate active-elevate-2" data-testid="card-steps">
+                      <CardContent className="p-4">
+                        <div className="text-xs uppercase tracking-widest opacity-60 mb-2">Steps</div>
+                        <div className="text-3xl font-bold font-mono text-primary">
+                          {latestHealth?.steps ? latestHealth.steps.toLocaleString() : "--"}
+                        </div>
+                        {latestHealth?.steps && <div className="text-xs opacity-60 mt-1">steps</div>}
+                      </CardContent>
+                    </Card>
+                  </DialogTrigger>
+                  <DialogContent className="bg-black border-white/10">
+                    <DialogHeader>
+                      <DialogTitle>Log Steps</DialogTitle>
+                      <DialogDescription>Enter your step count</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div>
+                        <Label htmlFor="steps">Steps</Label>
+                        <Input
+                          id="steps"
+                          type="number"
+                          value={steps}
+                          onChange={(e) => setSteps(e.target.value)}
+                          placeholder="10000"
+                          className="bg-black border-white/20 mt-2"
+                          data-testid="input-steps"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button onClick={handleStepsSubmit} disabled={createEntryMutation.isPending} data-testid="button-submit-steps">
+                        {createEntryMutation.isPending ? "Saving..." : "Save"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
 
             {/* Environment Summary */}
             <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-              <div className="text-xs uppercase tracking-widest opacity-40 mb-3">ENVIRONMENT</div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-3xl font-bold font-mono mb-1">{latestEnv?.aqi || "—"}</div>
-                  <div className="text-xs opacity-60">AQI • {latestEnv?.aqi ? (latestEnv.aqi < 50 ? "Good" : latestEnv.aqi < 100 ? "Moderate" : "Unhealthy") : "No data"}</div>
+              <div className="text-xs uppercase tracking-widest opacity-40 mb-4">ENVIRONMENT</div>
+              
+              <div className="space-y-4">
+                {/* Air Quality */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="text-xs opacity-60 mb-1">AQI</div>
+                    <div className="text-2xl font-bold font-mono text-primary">{latestEnv?.aqi || "—"}</div>
+                    <div className="text-xs opacity-40 mt-1">
+                      {latestEnv?.aqi ? (latestEnv.aqi < 50 ? "Good" : latestEnv.aqi < 100 ? "Moderate" : "Unhealthy") : "—"}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="text-xs opacity-60 mb-1">PM2.5</div>
+                    <div className="text-2xl font-bold font-mono text-primary">
+                      {latestEnv?.pm25 ? parseFloat(latestEnv.pm25.toString()).toFixed(1) : "—"}
+                    </div>
+                    <div className="text-xs opacity-40 mt-1">µg/m³</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg font-mono">{latestEnv?.temperature ? `${latestEnv.temperature}°F` : "—"}</div>
-                  <div className="text-xs opacity-60">{latestEnv?.humidity ? `${latestEnv.humidity}% humidity` : "—"}</div>
+
+                {/* Thermal Conditions */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="text-xs opacity-60 mb-1">Temperature</div>
+                    <div className="text-2xl font-bold font-mono text-primary">
+                      {latestEnv?.temperature ? `${parseFloat(latestEnv.temperature.toString()).toFixed(1)}°` : "—"}
+                    </div>
+                    <div className="text-xs opacity-40 mt-1">
+                      {latestEnv?.feelsLike ? `Feels like ${parseFloat(latestEnv.feelsLike.toString()).toFixed(1)}°` : "—"}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="text-xs opacity-60 mb-1">Humidity</div>
+                    <div className="text-2xl font-bold font-mono text-primary">{latestEnv?.humidity || "—"}</div>
+                    <div className="text-xs opacity-40 mt-1">%</div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 mt-4 text-xs opacity-40">
-                <MapPin className="w-3 h-3" />
-                <span>{latestEnv?.locationMode === "manual" ? "Indoor" : "Outdoor"}</span>
+
+                {/* Additional Metrics */}
+                {(latestEnv?.vocs || latestEnv?.noiseCurrent || latestEnv?.uvIndex) && (
+                  <div className="grid grid-cols-3 gap-3">
+                    {latestEnv?.vocs && (
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div className="text-xs opacity-60 mb-1">VOCs</div>
+                        <div className="text-lg font-bold font-mono text-primary">{latestEnv.vocs}</div>
+                        <div className="text-xs opacity-40 mt-1">ppb</div>
+                      </div>
+                    )}
+                    {latestEnv?.noiseCurrent && (
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div className="text-xs opacity-60 mb-1">Noise</div>
+                        <div className="text-lg font-bold font-mono text-primary">{latestEnv.noiseCurrent}</div>
+                        <div className="text-xs opacity-40 mt-1">dB</div>
+                      </div>
+                    )}
+                    {latestEnv?.uvIndex && (
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div className="text-xs opacity-60 mb-1">UV</div>
+                        <div className="text-lg font-bold font-mono text-primary">{latestEnv.uvIndex}</div>
+                        <div className="text-xs opacity-40 mt-1">Index</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Gas Pollutants - compact row */}
+                {(latestEnv?.co || latestEnv?.no2 || latestEnv?.o3) && (
+                  <div className="flex gap-3 overflow-x-auto">
+                    {latestEnv?.co && (
+                      <div className="p-2 bg-white/5 rounded border border-white/10 min-w-[80px]">
+                        <div className="text-xs opacity-60">CO</div>
+                        <div className="text-sm font-mono text-primary">{parseFloat(latestEnv.co.toString()).toFixed(1)}</div>
+                      </div>
+                    )}
+                    {latestEnv?.no2 && (
+                      <div className="p-2 bg-white/5 rounded border border-white/10 min-w-[80px]">
+                        <div className="text-xs opacity-60">NO₂</div>
+                        <div className="text-sm font-mono text-primary">{parseFloat(latestEnv.no2.toString()).toFixed(1)}</div>
+                      </div>
+                    )}
+                    {latestEnv?.o3 && (
+                      <div className="p-2 bg-white/5 rounded border border-white/10 min-w-[80px]">
+                        <div className="text-xs opacity-60">O₃</div>
+                        <div className="text-sm font-mono text-primary">{parseFloat(latestEnv.o3.toString()).toFixed(1)}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 mt-2 text-xs opacity-40 pt-2 border-t border-white/10">
+                  <MapPin className="w-3 h-3" />
+                  <span>{latestEnv?.locationMode === "manual" ? "Indoor" : "Outdoor"}</span>
+                  {latestEnv?.timestamp && (
+                    <span className="ml-auto">
+                      Updated {new Date(latestEnv.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </>

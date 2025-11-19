@@ -2,9 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import DeviceIntegrationItem from "@/components/DeviceIntegrationItem";
 import IndoorAirQualityCredentials from "@/components/IndoorAirQualityCredentials";
-import { User, MapPin, Activity, Droplets, Heart, Database, LogOut, RefreshCw, Watch, ChevronRight, Pill, Ruler } from "lucide-react";
+import { User, MapPin, Droplets, Database, LogOut, RefreshCw, Watch, ChevronRight, Pill, Ruler } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserLocation } from "@/hooks/useUserLocation";
@@ -143,13 +142,6 @@ export default function AccountScreen({ onLogout, onNavigate }: AccountScreenPro
         <div>
           <div className="text-xs uppercase tracking-widest opacity-40 mb-4">INTEGRATIONS</div>
           <div className="space-y-3">
-            <DeviceIntegrationItem
-              name="Health Care Provider Records"
-              icon={<Activity className="w-6 h-6 text-primary" />}
-              connected={true}
-              lastSync="2 hours ago"
-              onClick={() => console.log("Healthcare provider clicked")}
-            />
             <button 
               className="w-full flex items-center justify-between p-4 border border-white/10 rounded-lg hover-elevate active-elevate-2"
               onClick={() => console.log("Connect healthcare provider")}
@@ -157,23 +149,21 @@ export default function AccountScreen({ onLogout, onNavigate }: AccountScreenPro
             >
               <div className="flex items-center gap-3">
                 <Database className="w-6 h-6 text-primary" />
-                <span className="text-sm">Connect to Health Care Provider</span>
+                <span className="text-sm">Connect to Healthcare Records</span>
               </div>
               <ChevronRight className="w-4 h-4 opacity-60" />
             </button>
-            <DeviceIntegrationItem
-              name="Continuous Glucose Monitor"
-              icon={<Droplets className="w-6 h-6 text-primary" />}
-              connected={true}
-              lastSync="15 minutes ago"
-              onClick={() => console.log("CGM clicked")}
-            />
-            <DeviceIntegrationItem
-              name="Heart Rate Monitor"
-              icon={<Heart className="w-6 h-6 opacity-40" />}
-              connected={false}
-              onClick={() => console.log("HRM clicked")}
-            />
+            <button 
+              className="w-full flex items-center justify-between p-4 border border-white/10 rounded-lg hover-elevate active-elevate-2"
+              onClick={() => console.log("Connect CGM")}
+              data-testid="button-connect-cgm"
+            >
+              <div className="flex items-center gap-3">
+                <Droplets className="w-6 h-6 text-primary" />
+                <span className="text-sm">Connect to Continuous Glucose Monitor</span>
+              </div>
+              <ChevronRight className="w-4 h-4 opacity-60" />
+            </button>
           </div>
         </div>
 

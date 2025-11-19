@@ -78,15 +78,6 @@ async function pushToGitHub() {
     });
 
     console.log('💾 Creating commit...');
-    const { data: commit } = await octokit.git.createCommit({
-      owner,
-      repo,
-      message: 'Initial commit: Xuunu Health Tracking PWA',
-      tree: tree.sha,
-      parents: [], // No parent for initial commit
-    });
-
-    console.log('🚀 Updating main branch...');
     
     // Get current main branch reference
     const { data: currentRef } = await octokit.git.getRef({
@@ -95,11 +86,20 @@ async function pushToGitHub() {
       ref: 'heads/main',
     });
 
-    // Update with parent commit (the current HEAD)
+    // Create commit with current HEAD as parent
+    const commitMessage = `feat: Add steps tracking and expand environmental data display
+
+- Added steps field to health_entries schema for daily step count tracking
+- Added Steps metric card to Dashboard with manual entry dialog
+- Expanded environmental section with comprehensive categorized metrics (AQI, PM2.5, Temperature, Humidity, VOCs, Noise, UV Index, Gas Pollutants)
+- Removed placeholder healthcare/CGM connections from AccountScreen
+- All database tables confirmed including voice notes
+- Maintains extreme minimalism design (blue #0066FF, black, white only)`;
+
     const { data: newCommit } = await octokit.git.createCommit({
       owner,
       repo,
-      message: 'Add Xuunu Health Tracking PWA source code',
+      message: commitMessage,
       tree: tree.sha,
       parents: [currentRef.object.sha], // Include current HEAD as parent
     });

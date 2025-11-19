@@ -25,6 +25,7 @@ export const healthEntries = pgTable("health_entries", {
   sleepHours: decimal("sleep_hours", { precision: 4, scale: 2 }),
   bloodPressureSystolic: integer("blood_pressure_systolic"),
   bloodPressureDiastolic: integer("blood_pressure_diastolic"),
+  steps: integer("steps"),
   symptomSeverity: integer("symptom_severity"),
   symptoms: json("symptoms").$type<string[]>(),
   notes: text("notes"),
@@ -241,6 +242,11 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export const insertHealthEntrySchema = createInsertSchema(healthEntries).omit({
   id: true,
   timestamp: true,
+}).extend({
+  activity: z.union([z.string(), z.number()]).optional().nullable().transform(val => val ? String(val) : null),
+  recovery: z.union([z.string(), z.number()]).optional().nullable().transform(val => val ? String(val) : null),
+  strain: z.union([z.string(), z.number()]).optional().nullable().transform(val => val ? String(val) : null),
+  sleepHours: z.union([z.string(), z.number()]).optional().nullable().transform(val => val ? String(val) : null),
 });
 
 export const insertEnvironmentalReadingSchema = createInsertSchema(environmentalReadings).omit({
