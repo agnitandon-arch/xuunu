@@ -1,8 +1,10 @@
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Plus, Clock } from "lucide-react";
 import EnvironmentalCard from "@/components/EnvironmentalCard";
 import HealthEntryCard from "@/components/HealthEntryCard";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HomeScreenProps {
   userName?: string;
@@ -10,39 +12,34 @@ interface HomeScreenProps {
 }
 
 export default function HomeScreen({ userName = "User", onLogClick }: HomeScreenProps) {
-  //todo: remove mock functionality - replace with real data from API/Firebase
-  const mockRecentEntries = [
-    {
-      timestamp: new Date(),
-      glucose: 125,
-      symptomSeverity: 3,
-      symptoms: ["Fatigue"],
-      location: "Seattle, WA",
-      weather: "Cloudy",
-      aqi: 45,
-      notes: "Feeling good today"
-    },
-    {
-      timestamp: new Date(Date.now() - 86400000),
-      glucose: 165,
-      symptomSeverity: 6,
-      symptoms: ["Fatigue", "Brain Fog", "Headache"],
-      location: "Seattle, WA",
-      weather: "Rainy",
-      aqi: 95,
-    },
-    {
-      timestamp: new Date(Date.now() - 172800000),
-      glucose: 110,
-      symptomSeverity: 2,
-      symptoms: [],
-      location: "Seattle, WA",
-      weather: "Sunny",
-      aqi: 35,
-    }
-  ];
+  const { user } = useAuth();
 
-  const lastLoggedHours = 6;
+  const { data: latestEnvReading } = useQuery({
+    queryKey: [`/api/environmental-readings/latest?userId=${user?.uid}`],
+    queryFn: async () => {
+      if (!user?.uid) return null;
+      const response = await fetch(`/api/environmental-readings/latest?userId=${user.uid}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!user?.uid,
+  });
+
+  const { data: healthEntries = [] } = useQuery({
+    queryKey: [`/api/health-entries?userId=${user?.uid}`],
+    queryFn: async () => {
+      if (!user?.uid) return [];
+      const response = await fetch(`/api/health-entries?userId=${user.uid}&limit=3`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!user?.uid,
+  });
+
+  const lastEntry = healthEntries[0];
+  const lastLoggedText = lastEntry 
+    ? `Last logged ${formatDistanceToNow(new Date(lastEntry.timestamp), { addSuffix: true })}`
+    : "No entries yet";
 
   return (
     <div className="flex-1 overflow-y-auto pb-20" style={{ paddingTop: "env(safe-area-inset-top)" }}>
@@ -58,18 +55,25 @@ export default function HomeScreen({ userName = "User", onLogClick }: HomeScreen
         
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="w-4 h-4" />
-          <span data-testid="text-last-logged">Last logged {lastLoggedHours} hours ago</span>
+          <span data-testid="text-last-logged">{lastLoggedText}</span>
         </div>
         
-        <EnvironmentalCard
-          aqi={65}
-          temperature={72}
-          feelsLike={70}
-          humidity={55}
-          weather="Partly Cloudy"
-          pm25={12.5}
-          pm10={22.3}
-        />
+        {latestEnvReading ? (
+          <EnvironmentalCard
+            aqi={latestEnvReading.aqi || 0}
+            temperature={latestEnvReading.temperature ? parseFloat(latestEnvReading.temperature as string) : 0}
+            feelsLike={latestEnvReading.feelsLike ? parseFloat(latestEnvReading.feelsLike as string) : 0}
+            humidity={latestEnvReading.humidity || 0}
+            weather="Conditions"
+            pm25={latestEnvReading.pm25 ? parseFloat(latestEnvReading.pm25 as string) : undefined}
+            pm10={latestEnvReading.pm10 ? parseFloat(latestEnvReading.pm10 as string) : undefined}
+          />
+        ) : (
+          <div className="p-6 bg-card rounded-lg border border-card-border text-center">
+            <p className="text-sm text-muted-foreground">No environmental data yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Enter a location on the Environmental screen to track air quality</p>
+          </div>
+        )}
         
         <Button 
           className="w-full h-14 text-lg"
@@ -82,15 +86,26 @@ export default function HomeScreen({ userName = "User", onLogClick }: HomeScreen
         
         <div>
           <h2 className="text-lg font-semibold mb-4">Recent Entries</h2>
-          <div className="space-y-3">
-            {mockRecentEntries.map((entry, index) => (
-              <HealthEntryCard
-                key={index}
-                {...entry}
-                onClick={() => console.log("View entry", index)}
-              />
-            ))}
-          </div>
+          {healthEntries.length > 0 ? (
+            <div className="space-y-3">
+              {healthEntries.map((entry: any) => (
+                <HealthEntryCard
+                  key={entry.id}
+                  timestamp={new Date(entry.timestamp)}
+                  glucose={entry.glucose}
+                  symptomSeverity={entry.symptomSeverity}
+                  symptoms={entry.symptoms || []}
+                  notes={entry.notes}
+                  onClick={() => console.log("View entry", entry.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 bg-card rounded-lg border border-card-border text-center">
+              <p className="text-sm text-muted-foreground">No health entries yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Tap "Log Health Data" to get started</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
