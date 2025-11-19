@@ -14,30 +14,38 @@ interface HomeScreenProps {
 export default function HomeScreen({ userName = "User", onLogClick }: HomeScreenProps) {
   const { user } = useAuth();
 
-  const { data: latestEnvReading } = useQuery({
+  const { data: latestEnvReading, isError: envError, isLoading: envLoading } = useQuery({
     queryKey: [`/api/environmental-readings/latest?userId=${user?.uid}`],
     queryFn: async () => {
       if (!user?.uid) return null;
       const response = await fetch(`/api/environmental-readings/latest?userId=${user.uid}`);
-      if (!response.ok) return null;
+      if (!response.ok) {
+        throw new Error(`Failed to fetch environmental data: ${response.statusText}`);
+      }
       return response.json();
     },
     enabled: !!user?.uid,
   });
 
-  const { data: healthEntries = [] } = useQuery({
+  const { data: healthEntries = [], isError: healthError, isLoading: healthLoading } = useQuery({
     queryKey: [`/api/health-entries?userId=${user?.uid}`],
     queryFn: async () => {
       if (!user?.uid) return [];
       const response = await fetch(`/api/health-entries?userId=${user.uid}&limit=3`);
-      if (!response.ok) return [];
+      if (!response.ok) {
+        throw new Error(`Failed to fetch health entries: ${response.statusText}`);
+      }
       return response.json();
     },
     enabled: !!user?.uid,
   });
 
   const lastEntry = healthEntries[0];
-  const lastLoggedText = lastEntry 
+  const lastLoggedText = healthLoading
+    ? "Loading..."
+    : healthError
+    ? "Unable to load"
+    : lastEntry 
     ? `Last logged ${formatDistanceToNow(new Date(lastEntry.timestamp), { addSuffix: true })}`
     : "No entries yet";
 
@@ -58,7 +66,16 @@ export default function HomeScreen({ userName = "User", onLogClick }: HomeScreen
           <span data-testid="text-last-logged">{lastLoggedText}</span>
         </div>
         
-        {latestEnvReading ? (
+        {envError ? (
+          <div className="p-6 bg-destructive/10 rounded-lg border border-destructive text-center">
+            <p className="text-sm text-destructive font-medium">Failed to load environmental data</p>
+            <p className="text-xs text-muted-foreground mt-1">Please try refreshing the page</p>
+          </div>
+        ) : envLoading ? (
+          <div className="p-6 bg-card rounded-lg border border-card-border text-center">
+            <p className="text-sm text-muted-foreground">Loading environmental data...</p>
+          </div>
+        ) : latestEnvReading ? (
           <EnvironmentalCard
             aqi={latestEnvReading.aqi || 0}
             temperature={latestEnvReading.temperature ? parseFloat(latestEnvReading.temperature as string) : 0}
@@ -86,7 +103,16 @@ export default function HomeScreen({ userName = "User", onLogClick }: HomeScreen
         
         <div>
           <h2 className="text-lg font-semibold mb-4">Recent Entries</h2>
-          {healthEntries.length > 0 ? (
+          {healthError ? (
+            <div className="p-6 bg-destructive/10 rounded-lg border border-destructive text-center">
+              <p className="text-sm text-destructive font-medium">Failed to load health entries</p>
+              <p className="text-xs text-muted-foreground mt-1">Please try refreshing the page</p>
+            </div>
+          ) : healthLoading ? (
+            <div className="p-6 bg-card rounded-lg border border-card-border text-center">
+              <p className="text-sm text-muted-foreground">Loading health entries...</p>
+            </div>
+          ) : healthEntries.length > 0 ? (
             <div className="space-y-3">
               {healthEntries.map((entry: any) => (
                 <HealthEntryCard
