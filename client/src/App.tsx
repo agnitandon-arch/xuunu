@@ -10,7 +10,6 @@ import DashboardScreen from "@/pages/DashboardScreen";
 import DataInsightsScreen from "@/pages/DataInsightsScreen";
 import AccountScreen from "@/pages/AccountScreen";
 import EnvironmentalScreen from "@/pages/EnvironmentalScreen";
-import PollutantsScreen from "@/pages/PollutantsScreen";
 import DeviceConnectionScreen from "@/pages/DeviceConnectionScreen";
 import MedicationTrackerScreen from "@/pages/MedicationTrackerScreen";
 import ShowcaseAll from "@/pages/ShowcaseAll";
@@ -58,8 +57,6 @@ function AppContent() {
     switch (activeTab) {
       case "dashboard":
         return <DashboardScreen />;
-      case "pollutants":
-        return <PollutantsScreen />;
       case "data":
         return <DataInsightsScreen />;
       case "environmental":

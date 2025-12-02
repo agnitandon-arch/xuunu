@@ -1,4 +1,4 @@
-import { Home, Plus, BarChart2, MapPin, User, Droplet } from "lucide-react";
+import { Home, BarChart2, MapPin, User } from "lucide-react";
 
 interface MinimalBottomNavProps {
   activeTab: string;
@@ -8,8 +8,6 @@ interface MinimalBottomNavProps {
 export default function MinimalBottomNav({ activeTab, onTabChange }: MinimalBottomNavProps) {
   const tabs = [
     { id: "dashboard", icon: Home, label: "Dashboard" },
-    { id: "track", icon: Plus, label: "Track" },
-    { id: "pollutants", icon: Droplet, label: "Pollutants" },
     { id: "data", icon: BarChart2, label: "Data" },
     { id: "environmental", icon: MapPin, label: "Map" },
     { id: "account", icon: User, label: "Account" },
