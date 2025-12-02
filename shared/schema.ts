@@ -161,6 +161,8 @@ export const insertNoteSchema = createInsertSchema(notes).omit({
   updatedAt: true,
 }).extend({
   isVoiceNote: z.number().min(0).max(1),
+  audioData: z.string().nullable().optional(),
+  audioDuration: z.number().nullable().optional(),
   hasNotification: z.number().min(0).max(1),
   isCompleted: z.number().min(0).max(1),
 });
