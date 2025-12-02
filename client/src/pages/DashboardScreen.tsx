@@ -37,6 +37,7 @@ export default function DashboardScreen() {
   const [sleepDialog, setSleepDialog] = useState(false);
   const [bpDialog, setBpDialog] = useState(false);
   const [heartRateDialog, setHeartRateDialog] = useState(false);
+  const [stepsDialog, setStepsDialog] = useState(false);
   
   // Form states
   const [glucose, setGlucose] = useState("");
@@ -45,6 +46,7 @@ export default function DashboardScreen() {
   const [systolic, setSystolic] = useState("");
   const [diastolic, setDiastolic] = useState("");
   const [heartRate, setHeartRate] = useState("");
+  const [steps, setSteps] = useState("");
 
   const { data: latestHealth, isLoading: healthLoading } = useQuery<HealthEntry | null>({
     queryKey: [`/api/health-entries/latest?userId=${user?.uid}`],
@@ -132,6 +134,16 @@ export default function DashboardScreen() {
     });
     setHeartRate("");
     setHeartRateDialog(false);
+  };
+
+  const handleStepsSubmit = () => {
+    if (!steps || !user) return;
+    createEntryMutation.mutate({
+      userId: user.uid,
+      steps: parseInt(steps),
+    });
+    setSteps("");
+    setStepsDialog(false);
   };
 
   // Only use real data from database/integrations - no fake values
@@ -429,6 +441,46 @@ export default function DashboardScreen() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+
+                {/* Steps */}
+                <Dialog open={stepsDialog} onOpenChange={setStepsDialog}>
+                  <DialogTrigger asChild>
+                    <Card className="cursor-pointer hover-elevate active-elevate-2" data-testid="card-steps">
+                      <CardContent className="p-4">
+                        <div className="text-xs uppercase tracking-widest opacity-60 mb-2">Steps</div>
+                        <div className="text-3xl font-bold font-mono text-primary">
+                          {latestHealth?.steps ? latestHealth.steps.toLocaleString() : "--"}
+                        </div>
+                        {latestHealth?.steps && <div className="text-xs opacity-60 mt-1">today</div>}
+                      </CardContent>
+                    </Card>
+                  </DialogTrigger>
+                  <DialogContent className="bg-black border-white/10">
+                    <DialogHeader>
+                      <DialogTitle>Log Steps</DialogTitle>
+                      <DialogDescription>Enter your step count</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div>
+                        <Label htmlFor="steps">Steps</Label>
+                        <Input
+                          id="steps"
+                          type="number"
+                          value={steps}
+                          onChange={(e) => setSteps(e.target.value)}
+                          placeholder="10000"
+                          className="bg-black border-white/20 mt-2"
+                          data-testid="input-steps"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button onClick={handleStepsSubmit} disabled={createEntryMutation.isPending} data-testid="button-submit-steps">
+                        {createEntryMutation.isPending ? "Saving..." : "Save"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
 
@@ -474,7 +526,8 @@ export default function DashboardScreen() {
                     <div className="text-xs opacity-40 mt-1">
                       {entry.glucose && `Glucose: ${entry.glucose} • `}
                       {entry.heartRate && `HR: ${entry.heartRate} • `}
-                      {entry.sleepHours && `Sleep: ${entry.sleepHours}h`}
+                      {entry.sleepHours && `Sleep: ${entry.sleepHours}h • `}
+                      {entry.steps && `Steps: ${entry.steps.toLocaleString()}`}
                     </div>
                   </div>
                 </button>
