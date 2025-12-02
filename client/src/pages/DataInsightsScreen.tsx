@@ -1,12 +1,18 @@
+import VoiceRecorder from "@/components/VoiceRecorder";
+import VoiceNotesList from "@/components/VoiceNotesList";
+
 export default function DataInsightsScreen() {
-  //todo: remove mock functionality - generate from real data
   return (
     <div className="min-h-screen bg-black pb-20" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="max-w-lg mx-auto px-6 py-8 space-y-6">
         <div>
           <h1 className="text-2xl font-bold mb-2">Data</h1>
-          <p className="text-sm opacity-60">Insights and trends</p>
+          <p className="text-sm opacity-60">Insights and voice notes</p>
         </div>
+
+        <VoiceRecorder />
+        
+        <VoiceNotesList />
 
         <div className="flex gap-2">
           {["7D", "30D", "90D", "1Y"].map((range) => (
@@ -66,17 +72,6 @@ export default function DataInsightsScreen() {
                 <div className="text-xs opacity-60">mg/dL lower</div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6">
-          <div className="text-xs uppercase tracking-widest text-primary mb-2">DATA SYNC</div>
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium">Epic Health Records</div>
-              <div className="text-xs opacity-60 mt-1">Last synced 2 hours ago</div>
-            </div>
-            <div className="text-primary text-sm">Connected</div>
           </div>
         </div>
 
