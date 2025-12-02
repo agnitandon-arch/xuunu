@@ -25,6 +25,7 @@ export const healthEntries = pgTable("health_entries", {
   sleepHours: decimal("sleep_hours", { precision: 4, scale: 2 }),
   bloodPressureSystolic: integer("blood_pressure_systolic"),
   bloodPressureDiastolic: integer("blood_pressure_diastolic"),
+  steps: integer("steps"),
   symptomSeverity: integer("symptom_severity"),
   symptoms: json("symptoms").$type<string[]>(),
   notes: text("notes"),
