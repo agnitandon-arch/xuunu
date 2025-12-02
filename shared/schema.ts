@@ -145,6 +145,8 @@ export const notes = pgTable("notes", {
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   isVoiceNote: integer("is_voice_note").notNull().default(0),
+  audioData: text("audio_data"),
+  audioDuration: integer("audio_duration"),
   hasNotification: integer("has_notification").notNull().default(0),
   notificationContext: text("notification_context"),
   notificationTrigger: text("notification_trigger"),
