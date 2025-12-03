@@ -11,11 +11,13 @@ const fitbitOAuthStates = new Map<string, { userId: string; createdAt: number }>
 
 setInterval(() => {
   const now = Date.now();
-  for (const [key, value] of fitbitOAuthStates.entries()) {
+  const keysToDelete: string[] = [];
+  fitbitOAuthStates.forEach((value, key) => {
     if (now - value.createdAt > 10 * 60 * 1000) {
-      fitbitOAuthStates.delete(key);
+      keysToDelete.push(key);
     }
-  }
+  });
+  keysToDelete.forEach(key => fitbitOAuthStates.delete(key));
 }, 60000);
 
 export async function registerRoutes(app: Express): Promise<Server> {
