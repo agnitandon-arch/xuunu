@@ -7,7 +7,21 @@ import { TerraClient } from "terra-api";
 import Anthropic from "@anthropic-ai/sdk";
 import crypto from "crypto";
 
-const fitbitOAuthStates = new Map<string, { userId: string; createdAt: number }>();
+interface FitbitOAuthState {
+  userId: string;
+  createdAt: number;
+  codeVerifier: string;
+}
+
+const fitbitOAuthStates = new Map<string, FitbitOAuthState>();
+
+function generateCodeVerifier(): string {
+  return crypto.randomBytes(32).toString('base64url');
+}
+
+function generateCodeChallenge(verifier: string): string {
+  return crypto.createHash('sha256').update(verifier).digest('base64url');
+}
 
 setInterval(() => {
   const now = Date.now();
@@ -598,7 +612,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const state = crypto.randomBytes(32).toString('hex');
-      fitbitOAuthStates.set(state, { userId, createdAt: Date.now() });
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = generateCodeChallenge(codeVerifier);
+      
+      fitbitOAuthStates.set(state, { 
+        userId, 
+        createdAt: Date.now(),
+        codeVerifier
+      });
       
       const scopes = "activity heartrate sleep profile weight";
       const host = req.get('host') || 'localhost:5000';
@@ -610,7 +631,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `&client_id=${credentials.fitbitClientId}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&scope=${encodeURIComponent(scopes)}` +
-        `&state=${state}`;
+        `&state=${state}` +
+        `&code_challenge=${codeChallenge}` +
+        `&code_challenge_method=S256`;
 
       res.json({ authUrl, state });
     } catch (error) {
@@ -632,8 +655,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).send("Invalid or expired state parameter");
       }
 
+      const { userId, codeVerifier } = stateData;
       fitbitOAuthStates.delete(state as string);
-      const userId = stateData.userId;
 
       const credentials = await storage.getUserApiCredentials(userId);
 
@@ -657,6 +680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           grant_type: "authorization_code",
           code: code as string,
           redirect_uri: redirectUri,
+          code_verifier: codeVerifier,
         }),
       });
 
