@@ -81,6 +81,13 @@ export const userApiCredentials = pgTable("user_api_credentials", {
   terraDevId: text("terra_dev_id"),
   terraApiKey: text("terra_api_key"),
   terraWebhookSecret: text("terra_webhook_secret"),
+  // Fitbit API OAuth credentials
+  fitbitClientId: text("fitbit_client_id"),
+  fitbitClientSecret: text("fitbit_client_secret"),
+  fitbitAccessToken: text("fitbit_access_token"),
+  fitbitRefreshToken: text("fitbit_refresh_token"),
+  fitbitUserId: text("fitbit_user_id"),
+  fitbitTokenExpiresAt: timestamp("fitbit_token_expires_at"),
   // Indoor Air Quality Monitoring Devices
   awairApiKey: text("awair_api_key"),
   awairDeviceId: text("awair_device_id"),
