@@ -223,4 +223,121 @@ export const storage = {
       return { id: docRef.id, userId, ...credentials };
     }
   }
-};
+// Add after the existing methods:
+
+async getLatestEnvironmentalReading(userId: string) {
+  const readings = await this.getUserEnvironmentalReadings(userId, 1);
+  return readings[0] || null;
+},
+
+async getRecentEnvironmentalReadings(userId: string, hoursAgo: number = 24) {
+  const db = getFirestoreDb();
+  const cutoffTime = Timestamp.fromDate(new Date(Date.now() - hoursAgo * 60 * 60 * 1000));
+  const snapshot = await db.collection("environmentalReadings")
+    .where("userId", "==", userId)
+    .where("timestamp", ">=", cutoffTime)
+    .orderBy("timestamp", "desc")
+    .get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), timestamp: toDate(doc.data().timestamp) }));
+},
+
+async updateUserPreferences(userId: string, preferences: any) {
+  const db = getFirestoreDb();
+  await db.collection("users").doc(userId).update(preferences);
+  return this.getUser(userId);
+},
+
+async getUserBioSignatureSnapshots(userId: string, limit: number = 20) {
+  return this.getBioSignatureHistory(userId, limit);
+},
+
+async getConnectedDevices(userId: string) {
+  const db = getFirestoreDb();
+  const snapshot = await db.collection("connectedDevices")
+    .where("userId", "==", userId)
+    .get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+},
+
+async createConnectedDevice(device: any) {
+  const db = getFirestoreDb();
+  const docRef = await db.collection("connectedDevices").add({ 
+    ...device, 
+    createdAt: Timestamp.now() 
+  });
+  return { id: docRef.id, ...device };
+},
+
+// Medications
+async createMedication(medication: any) {
+  const db = getFirestoreDb();
+  const docRef = await db.collection("medications").add({ 
+    ...medication, 
+    createdAt: Timestamp.now(),
+    isActive: true 
+  });
+  return { id: docRef.id, ...medication };
+},
+
+async getMedicationsByUserId(userId: string) {
+  const db = getFirestoreDb();
+  const snapshot = await db.collection("medications")
+    .where("userId", "==", userId)
+    .where("isActive", "==", true)
+    .get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+},
+
+async getMedicationById(id: string) {
+  const db = getFirestoreDb();
+  const doc = await db.collection("medications").doc(id).get();
+  if (!doc.exists) return undefined;
+  return { id: doc.id, ...doc.data() };
+},
+
+async updateMedication(id: string, updates: any) {
+  const db = getFirestoreDb();
+  await db.collection("medications").doc(id).update({ 
+    ...updates, 
+    updatedAt: Timestamp.now() 
+  });
+  return this.getMedicationById(id);
+},
+
+async deleteMedication(id: string) {
+  const db = getFirestoreDb();
+  await db.collection("medications").doc(id).update({ 
+    isActive: false,
+    updatedAt: Timestamp.now() 
+  });
+},
+
+// Medication Logs
+async createMedicationLog(log: any) {
+  const db = getFirestoreDb();
+  const docRef = await db.collection("medicationLogs").add({ 
+    ...log, 
+    takenAt: Timestamp.now() 
+  });
+  return { id: docRef.id, ...log };
+},
+
+async getMedicationLogs(userId: string, medicationId?: string, startDate?: string, endDate?: string) {
+  const db = getFirestoreDb();
+  let query: any = db.collection("medicationLogs").where("userId", "==", userId);
+  
+  if (medicationId) {
+    query = query.where("medicationId", "==", medicationId);
+  }
+  
+  if (startDate) {
+    query = query.where("takenAt", ">=", Timestamp.fromDate(new Date(startDate)));
+  }
+  
+  if (endDate) {
+    query = query.where("takenAt", "<=", Timestamp.fromDate(new Date(endDate)));
+  }
+  
+  const snapshot = await query.orderBy("takenAt", "desc").get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), takenAt: toDate(doc.data().takenAt) }));
+},};
