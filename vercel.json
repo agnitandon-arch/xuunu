@@ -1,7 +1,6 @@
 {
   "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist/public",
-  "framework": "vite",
   "functions": {
     "api/**/*.ts": {
       "runtime": "nodejs20.x"
