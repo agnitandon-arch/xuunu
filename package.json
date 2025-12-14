@@ -108,4 +108,15 @@
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
   }
-}
+{
+  "name": "rest-express",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": "20.x"
+  },
+  "scripts": {
+    ...
+  }
+}}
