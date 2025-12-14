@@ -1,0 +1,7 @@
+server/
+shared/
+drizzle/
+*.md
+.local/
+attached_assets/
+dist/index.js
