@@ -1,2 +1,14 @@
-git add api/ vercel.json && git commit -m "Add Vercel API files" && git push origin main
-git stash && git pull origin main && git stash pop && git add api/ vercel.json && git commit -m "Add Vercel API" && git push origin main
+{
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "dist/public",
+  "framework": "vite",
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "@vercel/node@3.0.0"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
