@@ -1,0 +1,55 @@
+
+Request
+Messages
+Dec 15 09:57:02.37
+GET
+500
+xuunu-git-main-agni.vercel.app
+/api/health-entries/latest
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/_lib/storage' imported from /var/task/api/health-entries/latest.js at finalizeResolution (node:internal/modules/esm/resolve:287:11) at moduleResolve (node:internal/modules/esm/resolve:956:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:1192:14) at defaultResolve (node:internal/modules/esm/resolve:1235:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38) at ModuleJob._link (node:internal/modules/esm/module_job:168:49) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/_lib/storage' } Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Dec 15 09:57:02.37
+GET
+500
+xuunu-git-main-agni.vercel.app
+/api/health-entries
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/_lib/storage' imported from /var/task/api/health-entries/index.js at finalizeResolution (node:internal/modules/esm/resolve:287:11) at moduleResolve (node:internal/modules/esm/resolve:956:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:1192:14) at defaultResolve (node:internal/modules/esm/resolve:1235:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38) at ModuleJob._link (node:internal/modules/esm/module_job:168:49) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/_lib/storage' } Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Dec 15 09:57:02.06
+POST
+500
+xuunu-git-main-agni.vercel.app
+/api/users/sync
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/_lib/storage' imported from /var/task/api/users/sync.js at finalizeResolution (node:internal/modules/esm/resolve:287:11) at moduleResolve (node:internal/modules/esm/resolve:956:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:1192:14) at defaultResolve (node:internal/modules/esm/resolve:1235:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38) at ModuleJob._link (node:internal/modules/esm/module_job:168:49) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/_lib/storage' } Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Dec 15 09:53:47.04
+GET
+500
+xuunu-git-main-agni.vercel.app
+/api/health-entries
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/_lib/storage' imported from /var/task/api/health-entries/index.js at finalizeResolution (node:internal/modules/esm/resolve:287:11) at moduleResolve (node:internal/modules/esm/resolve:956:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:1192:14) at defaultResolve (node:internal/modules/esm/resolve:1235:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38) at ModuleJob._link (node:internal/modules/esm/module_job:168:49) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/_lib/storage' } Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Dec 15 09:53:47.04
+GET
+500
+xuunu-git-main-agni.vercel.app
+/api/health-entries/latest
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/_lib/storage' imported from /var/task/api/health-entries/latest.js at finalizeResolution (node:internal/modules/esm/resolve:287:11) at moduleResolve (node:internal/modules/esm/resolve:956:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:1192:14) at defaultResolve (node:internal/modules/esm/resolve:1235:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38) at ModuleJob._link (node:internal/modules/esm/module_job:168:49) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/_lib/storage' } Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Dec 15 09:53:46.70
+POST
+500
+xuunu-git-main-agni.vercel.app
+/api/users/sync
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/_lib/storage' imported from /var/task/api/users/sync.js at finalizeResolution (node:internal/modules/esm/resolve:287:11) at moduleResolve (node:internal/modules/esm/resolve:956:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:1192:14) at defaultResolve (node:internal/modules/esm/resolve:1235:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38) at ModuleJob._link (node:internal/modules/esm/module_job:168:49) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/_lib/storage' } Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Dec 15 09:53:12.80
+GET
+---
+xuunu-git-main-agni.vercel.app
+/api/health-entries/latest
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/_lib/storage' imported from /var/task/api/health-entries/latest.js at finalizeResolution (node:internal/modules/esm/resolve:287:11) at moduleResolve (node:internal/modules/esm/resolve:956:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:1192:14) at defaultResolve (node:internal/modules/esm/resolve:1235:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38) at ModuleJob._link (node:internal/modules/esm/module_job:168:49) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/_lib/storage' } Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Dec 15 09:53:12.80
+GET
+500
+xuunu-git-main-agni.vercel.app
+/api/health-entries
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/_lib/storage' imported from /var/task/api/health-entries/index.js at finalizeResolution (node:internal/modules/esm/resolve:287:11) at moduleResolve (node:internal/modules/esm/resolve:956:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:1192:14) at defaultResolve (node:internal/modules/esm/resolve:1235:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38) at ModuleJob._link (node:internal/modules/esm/module_job:168:49) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/_lib/storage' } Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Dec 15 09:53:12.35
+POST
+500
+xuunu-git-main-agni.vercel.app
