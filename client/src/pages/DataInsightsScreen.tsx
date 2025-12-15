@@ -1,18 +1,11 @@
-import VoiceRecorder from "@/components/VoiceRecorder";
-import VoiceNotesList from "@/components/VoiceNotesList";
-
 export default function DataInsightsScreen() {
   return (
     <div className="min-h-screen bg-black pb-20" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="max-w-lg mx-auto px-6 py-8 space-y-6">
         <div>
           <h1 className="text-2xl font-bold mb-2">Data</h1>
-          <p className="text-sm opacity-60">Insights and voice notes</p>
+          <p className="text-sm opacity-60">Insights and trends</p>
         </div>
-
-        <VoiceRecorder />
-        
-        <VoiceNotesList />
 
         <div className="flex gap-2">
           {["7D", "30D", "90D", "1Y"].map((range) => (
