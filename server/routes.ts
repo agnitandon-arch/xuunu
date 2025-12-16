@@ -5,7 +5,19 @@ import { insertHealthEntrySchema, insertEnvironmentalReadingSchema, insertUserAp
 import { fromZodError } from "zod-validation-error";
 import { TerraClient } from "terra-api";
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import crypto from "crypto";
+
+const homeostasisInsightsCache = new Map<string, { insights: string; cachedAt: string }>();
+
+function getTodayDateString(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getOpenAIClient(): OpenAI | null {
+  if (!process.env.OPENAI_API_KEY) return null;
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 interface FitbitOAuthState {
   userId: string;
@@ -1218,6 +1230,73 @@ Be supportive and focus on diabetes/chronic illness management.`;
     } catch (error) {
       console.error("Error fetching medication logs:", error);
       res.status(500).json({ error: "Failed to fetch medication logs" });
+    }
+  });
+
+  // Homeostasis Insights API with caching (1 call per user per day)
+  app.post("/api/homeostasis-insights", async (req, res) => {
+    try {
+      const { userId, homeostasisLevel, healthData, environmentalData } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ error: "userId is required" });
+      }
+
+      const openaiClient = getOpenAIClient();
+      if (!openaiClient) {
+        return res.json({ 
+          insights: "AI insights are currently unavailable. Please check your OpenAI API configuration.", 
+          cached: false 
+        });
+      }
+
+      const today = getTodayDateString();
+      const cacheKey = `${userId}_${today}`;
+      
+      // Check for existing cached insight for today
+      const cachedInsight = homeostasisInsightsCache.get(cacheKey);
+      
+      if (cachedInsight) {
+        return res.json({ 
+          insights: cachedInsight.insights,
+          cached: true,
+          cachedAt: cachedInsight.cachedAt,
+          message: "Using cached insight (limit: 1 AI call per day)"
+        });
+      }
+
+      // Generate new insight via OpenAI
+      const prompt = `You are a health advisor for a diabetes and chronic illness tracking app called Xuunu. 
+Based on the following data, provide a brief, personalized insight (2-3 sentences) about the user's current homeostasis level.
+
+Homeostasis Level: ${homeostasisLevel}/100
+Health Data: ${JSON.stringify(healthData)}
+Environmental Data: ${JSON.stringify(environmentalData)}
+
+Focus on:
+- How their current metrics affect their body's balance
+- One actionable suggestion to improve their homeostasis
+- Be encouraging but realistic
+- Keep the response concise and actionable`;
+
+      const response = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 200,
+      });
+
+      const insights = response.choices[0]?.message?.content || "Unable to generate insights.";
+
+      // Cache the insight for today
+      homeostasisInsightsCache.set(cacheKey, {
+        insights,
+        cachedAt: new Date().toISOString(),
+      });
+
+      return res.json({ insights, cached: false });
+    } catch (error) {
+      console.error("Error generating homeostasis insights:", error);
+      res.status(500).json({ error: "Failed to generate insights" });
     }
   });
 
