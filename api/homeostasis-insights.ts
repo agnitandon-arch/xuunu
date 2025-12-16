@@ -1,5 +1,24 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import OpenAI from "openai";
+import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+
+function getDb() {
+  if (getApps().length === 0) {
+    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    if (!serviceAccountKey) {
+      throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY is required");
+    }
+    initializeApp({
+      credential: cert(JSON.parse(serviceAccountKey)),
+    });
+  }
+  return getFirestore();
+}
+
+function getTodayDateString(): string {
+  return new Date().toISOString().split('T')[0];
+}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -26,9 +45,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (!process.env.OPENAI_API_KEY) {
-      return res.json({ insights: "AI insights are currently unavailable. Please check your OpenAI API configuration." });
+      return res.json({ insights: "AI insights are currently unavailable. Please check your OpenAI API configuration.", cached: false });
     }
 
+    const db = getDb();
+    const today = getTodayDateString();
+    const cacheDocId = `${userId}_${today}`;
+    const cacheRef = db.collection("homeostasisInsightsCache").doc(cacheDocId);
+    
+    // Check for existing cached insight for today
+    const cachedDoc = await cacheRef.get();
+    
+    if (cachedDoc.exists) {
+      const cachedData = cachedDoc.data();
+      return res.json({ 
+        insights: cachedData?.insights || "Cached insight unavailable.",
+        cached: true,
+        cachedAt: cachedData?.createdAt,
+        message: "Using cached insight (limit: 1 AI call per day)"
+      });
+    }
+
+    // Generate new insight via OpenAI
     const prompt = `You are a health advisor for a diabetes and chronic illness tracking app called Xuunu. 
 Based on the following data, provide a brief, personalized insight (2-3 sentences) about the user's current homeostasis level.
 
@@ -50,7 +88,18 @@ Focus on:
 
     const insights = response.choices[0]?.message?.content || "Unable to generate insights.";
 
-    return res.json({ insights });
+    // Cache the insight for today
+    await cacheRef.set({
+      userId,
+      insights,
+      homeostasisLevel,
+      healthDataSnapshot: healthData,
+      environmentalDataSnapshot: environmentalData,
+      createdAt: new Date().toISOString(),
+      date: today,
+    });
+
+    return res.json({ insights, cached: false });
   } catch (error) {
     console.error("Error generating insights:", error);
     return res.status(500).json({ error: "Failed to generate insights" });
