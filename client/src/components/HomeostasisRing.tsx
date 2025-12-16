@@ -1,13 +1,13 @@
-interface EnvironmentalSynergyRingProps {
-  synergyLevel: number; // 0-100
+interface HomeostasisRingProps {
+  homeostasisLevel: number;
   size?: number;
 }
 
-export default function EnvironmentalSynergyRing({ 
-  synergyLevel, 
+export default function HomeostasisRing({ 
+  homeostasisLevel, 
   size = 200 
-}: EnvironmentalSynergyRingProps) {
-  const percentage = Math.min(Math.max(synergyLevel, 0), 100);
+}: HomeostasisRingProps) {
+  const percentage = Math.min(Math.max(homeostasisLevel, 0), 100);
   const circumference = 2 * Math.PI * 85;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
@@ -19,23 +19,22 @@ export default function EnvironmentalSynergyRing({
   };
 
   const getLabel = () => {
-    if (percentage >= 80) return "Optimal Synergy";
-    if (percentage >= 60) return "High Synergy";
-    if (percentage >= 40) return "Moderate Synergy";
-    return "Building Synergy";
+    if (percentage >= 80) return "Optimal Balance";
+    if (percentage >= 60) return "High Balance";
+    if (percentage >= 40) return "Moderate Balance";
+    return "Building Balance";
   };
 
   return (
-    <div className="flex flex-col items-center" data-testid="ring-synergy">
+    <div className="flex flex-col items-center" data-testid="ring-homeostasis">
       <div className="relative" style={{ width: size, height: size }}>
         <svg className="transform -rotate-90" width={size} height={size}>
           <defs>
-            <linearGradient id="synergyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="homeostasisGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" style={{ stopColor: getColor(), stopOpacity: 1 }} />
               <stop offset="100%" style={{ stopColor: getColor(), stopOpacity: 0.5 }} />
             </linearGradient>
           </defs>
-          {/* Background ring */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -44,12 +43,11 @@ export default function EnvironmentalSynergyRing({
             strokeWidth="8"
             fill="none"
           />
-          {/* Progress ring */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r="85"
-            stroke="url(#synergyGradient)"
+            stroke="url(#homeostasisGradient)"
             strokeWidth="8"
             fill="none"
             strokeDasharray={circumference}
@@ -59,15 +57,15 @@ export default function EnvironmentalSynergyRing({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-7xl font-bold font-mono" data-testid="text-synergy-level">{Math.round(percentage)}</span>
-          <span className="text-xs uppercase tracking-widest mt-1 opacity-60">SYNERGY LEVEL</span>
+          <span className="text-7xl font-bold font-mono" data-testid="text-homeostasis-level">{Math.round(percentage)}</span>
+          <span className="text-xs uppercase tracking-widest mt-1 opacity-60">HOMEOSTASIS</span>
         </div>
       </div>
       <div className="mt-4 text-center">
         <span className="text-sm font-medium" style={{ color: getColor() }}>
           {getLabel()}
         </span>
-        <span className="text-xs opacity-40 block mt-1">Environmental alignment score</span>
+        <span className="text-xs opacity-40 block mt-1">Body balance score</span>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
-import EnvironmentalSynergyRing from "@/components/EnvironmentalSynergyRing";
+import HomeostasisRing from "@/components/HomeostasisRing";
 import BioSignature from "@/components/BioSignature";
-import SynergyInsightsDialog from "@/components/SynergyInsightsDialog";
+import HomeostasisInsightsDialog from "@/components/HomeostasisInsightsDialog";
 import BioSignatureDialog from "@/components/BioSignatureDialog";
 import MedicationQuickLog from "@/components/MedicationQuickLog";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ export default function DashboardScreen() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showBioSignature, setShowBioSignature] = useState(false);
-  const [showSynergyDialog, setShowSynergyDialog] = useState(false);
+  const [showHomeostasisDialog, setShowHomeostasisDialog] = useState(false);
   const [showBioSignatureDialog, setShowBioSignatureDialog] = useState(false);
   
   // Dialog states for each metric
@@ -157,10 +157,32 @@ export default function DashboardScreen() {
     sleep: latestHealth?.sleepHours ? parseFloat(latestHealth.sleepHours.toString()) : 0,
   };
 
-  // Calculate synergy level from real data only
-  const synergyLevel = latestHealth && latestEnv && latestHealth.glucose && latestEnv.aqi ? 
-    Math.min(100, Math.round(((latestHealth.glucose > 0 ? 30 : 0) + (latestEnv.aqi > 0 ? 30 : 0)) / 0.6)) : 
-    0;
+  // Calculate homeostasis level from real data
+  const calculateHomeostasis = () => {
+    let score = 0;
+    let factors = 0;
+    
+    if (latestHealth?.glucose) {
+      score += Math.max(0, 100 - Math.abs(latestHealth.glucose - 100) * 0.8);
+      factors++;
+    }
+    if (latestHealth?.hrv) {
+      score += Math.min(100, latestHealth.hrv * 1.5);
+      factors++;
+    }
+    if (latestHealth?.sleepHours) {
+      score += Math.min(100, parseFloat(latestHealth.sleepHours.toString()) * 12.5);
+      factors++;
+    }
+    if (latestEnv?.aqi) {
+      score += Math.max(0, 100 - latestEnv.aqi * 0.5);
+      factors++;
+    }
+    
+    return factors > 0 ? Math.round(score / factors) : 0;
+  };
+  
+  const homeostasisLevel = calculateHomeostasis();
 
   return (
     <div className="min-h-screen bg-black pb-20" style={{ paddingTop: "env(safe-area-inset-top)" }}>
@@ -171,7 +193,7 @@ export default function DashboardScreen() {
             className="text-xs uppercase tracking-widest text-primary hover-elevate active-elevate-2 px-4 py-2 rounded-full border border-primary/30"
             data-testid="button-toggle-signature"
           >
-            {showBioSignature ? "Show Synergy" : "Bio Signature"}
+            {showBioSignature ? "Show Homeostasis" : "Bio Signature"}
           </button>
         </div>
 
@@ -186,21 +208,21 @@ export default function DashboardScreen() {
             </button>
           ) : (
             <button
-              onClick={() => setShowSynergyDialog(true)}
+              onClick={() => setShowHomeostasisDialog(true)}
               className="hover-elevate active-elevate-2 rounded-lg transition-all"
-              data-testid="button-open-synergy"
+              data-testid="button-open-homeostasis"
             >
-              <EnvironmentalSynergyRing synergyLevel={synergyLevel} />
+              <HomeostasisRing homeostasisLevel={homeostasisLevel} />
             </button>
           )}
         </div>
 
-        {/* Synergy Insights Dialog */}
+        {/* Homeostasis Insights Dialog */}
         {user && (
-          <SynergyInsightsDialog
-            open={showSynergyDialog}
-            onOpenChange={setShowSynergyDialog}
-            synergyLevel={synergyLevel}
+          <HomeostasisInsightsDialog
+            open={showHomeostasisDialog}
+            onOpenChange={setShowHomeostasisDialog}
+            homeostasisLevel={homeostasisLevel}
             healthData={healthData}
             environmentalData={latestEnv || {}}
             userId={user.uid}

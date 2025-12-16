@@ -1,26 +1,26 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Sparkles, TrendingUp, Info } from "lucide-react";
+import { Loader2, Sparkles, Info } from "lucide-react";
 import { useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 
-interface SynergyInsightsDialogProps {
+interface HomeostasisInsightsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  synergyLevel: number;
+  homeostasisLevel: number;
   healthData: any;
   environmentalData: any;
   userId: string;
 }
 
-export default function SynergyInsightsDialog({
+export default function HomeostasisInsightsDialog({
   open,
   onOpenChange,
-  synergyLevel,
+  homeostasisLevel,
   healthData,
   environmentalData,
   userId,
-}: SynergyInsightsDialogProps) {
+}: HomeostasisInsightsDialogProps) {
   const [insights, setInsights] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
@@ -29,9 +29,9 @@ export default function SynergyInsightsDialog({
     
     setLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/synergy-insights", {
+      const response = await apiRequest("POST", "/api/homeostasis-insights", {
         userId,
-        synergyLevel,
+        homeostasisLevel,
         healthData,
         environmentalData,
       });
@@ -53,42 +53,40 @@ export default function SynergyInsightsDialog({
   };
 
   const getColor = () => {
-    if (synergyLevel >= 80) return "#0066FF";
-    if (synergyLevel >= 60) return "#0088FF";
-    if (synergyLevel >= 40) return "#00AAFF";
+    if (homeostasisLevel >= 80) return "#0066FF";
+    if (homeostasisLevel >= 60) return "#0088FF";
+    if (homeostasisLevel >= 40) return "#00AAFF";
     return "#00CCFF";
   };
 
   const getLabel = () => {
-    if (synergyLevel >= 80) return "Optimal Synergy";
-    if (synergyLevel >= 60) return "High Synergy";
-    if (synergyLevel >= 40) return "Moderate Synergy";
-    return "Building Synergy";
+    if (homeostasisLevel >= 80) return "Optimal Balance";
+    if (homeostasisLevel >= 60) return "High Balance";
+    if (homeostasisLevel >= 40) return "Moderate Balance";
+    return "Building Balance";
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-black border-white/10 text-white max-w-md" data-testid="dialog-synergy-insights">
+      <DialogContent className="bg-black border-white/10 text-white max-w-md" data-testid="dialog-homeostasis-insights">
         <DialogHeader>
-          <DialogTitle className="text-xl">Environmental Synergy Level</DialogTitle>
+          <DialogTitle className="text-xl">Homeostasis Level</DialogTitle>
           <DialogDescription className="text-white/60">
-            Understanding your health-environment alignment
+            Understanding your body's balance
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {/* Synergy Level Display */}
           <div className="bg-white/5 border border-white/10 rounded-lg p-6 text-center">
             <div className="text-6xl font-bold font-mono" style={{ color: getColor() }}>
-              {synergyLevel}
+              {homeostasisLevel}
             </div>
-            <div className="text-sm opacity-60 mt-1">SYNERGY LEVEL</div>
+            <div className="text-sm opacity-60 mt-1">HOMEOSTASIS</div>
             <div className="mt-3 text-sm font-medium" style={{ color: getColor() }}>
               {getLabel()}
             </div>
           </div>
 
-          {/* Calculation Breakdown */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Info className="w-4 h-4 text-primary" />
@@ -96,21 +94,20 @@ export default function SynergyInsightsDialog({
             </div>
             <div className="space-y-2 text-sm opacity-80">
               <div className="flex items-center justify-between">
-                <span>Health Metrics Stability</span>
-                <span className="font-mono">{Math.min(90, Math.round((healthData.recovery || 75) * 0.9))}%</span>
+                <span>Metabolic Stability</span>
+                <span className="font-mono">{healthData.glucose ? Math.min(100, Math.round(100 - Math.abs(healthData.glucose - 100) * 0.5)) : 0}%</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Environmental Quality</span>
-                <span className="font-mono">{Math.min(100, Math.round(100 - (environmentalData.aqi || 65) * 0.5))}%</span>
+                <span className="font-mono">{environmentalData.aqi ? Math.min(100, Math.round(100 - environmentalData.aqi * 0.5)) : 0}%</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Activity-Recovery Balance</span>
-                <span className="font-mono">{Math.min(100, Math.round((healthData.recovery || 75) * 1.1))}%</span>
+                <span>Recovery Score</span>
+                <span className="font-mono">{healthData.sleep ? Math.min(100, Math.round(healthData.sleep * 12.5)) : 0}%</span>
               </div>
             </div>
           </div>
 
-          {/* AI Insights */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-4 h-4 text-primary" />
@@ -132,7 +129,7 @@ export default function SynergyInsightsDialog({
             onClick={() => onOpenChange(false)}
             variant="outline"
             className="w-full"
-            data-testid="button-close-synergy-dialog"
+            data-testid="button-close-homeostasis-dialog"
           >
             Close
           </Button>

@@ -109,7 +109,7 @@ function normalizeSleep(sleep: number): number {
 }
 
 /**
- * Compute weighted health synergy score (0-100)
+ * Compute weighted health homeostasis score (0-100)
  */
 export function computeHealthScore(metrics: HealthMetrics): number {
   const weights = {
@@ -228,5 +228,5 @@ export function getIdealPatternGuidance(): string {
 • Activity: 7-12 (balanced movement)
 • Strain: 8-14 (moderate exertion)
 
-When all metrics align within optimal ranges, the pattern becomes bright, dense, and symmetrical - representing a body in environmental synergy.`;
+When all metrics align within optimal ranges, the pattern becomes bright, dense, and symmetrical - representing a body in homeostasis.`;
 }
