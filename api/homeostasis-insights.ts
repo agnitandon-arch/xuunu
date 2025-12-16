@@ -100,8 +100,18 @@ Focus on:
     });
 
     return res.json({ insights, cached: false });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating insights:", error);
+    
+    // Handle OpenAI quota/rate limit errors gracefully
+    if (error?.code === 'insufficient_quota' || error?.status === 429) {
+      return res.json({ 
+        insights: "AI insights are temporarily unavailable due to API limits. Please try again later.",
+        cached: false,
+        error: "quota_exceeded"
+      });
+    }
+    
     return res.status(500).json({ error: "Failed to generate insights" });
   }
 }
