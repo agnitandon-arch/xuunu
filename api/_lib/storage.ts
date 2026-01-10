@@ -20,12 +20,17 @@ function getFirestoreDb(): Firestore {
         throw new Error("Invalid service account key: missing required fields (project_id, private_key, or client_email)");
       }
       
+      // Fix private key if it has escaped newlines (common when stored as env var)
+      if (serviceAccount.private_key && typeof serviceAccount.private_key === 'string') {
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+      }
+      
       initializeApp({
         credential: cert(serviceAccount),
         projectId: serviceAccount.project_id,
       });
       
-      console.log("Firebase Admin initialized successfully");
+      console.log("Firebase Admin initialized successfully for project:", serviceAccount.project_id);
     } catch (error) {
       if (error instanceof SyntaxError) {
         console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY as JSON:", error.message);
