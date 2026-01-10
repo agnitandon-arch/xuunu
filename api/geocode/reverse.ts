@@ -29,10 +29,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const data = await response.json();
+    // Format location string for display
+    const city = data.city || data.locality || "Unknown";
+    const state = data.principalSubdivision || null;
+    const country = data.countryName || "Unknown";
+    const formatted = state 
+      ? `${city}, ${state}` 
+      : `${city}, ${country}`;
+    
     return res.json({
-      city: data.city || data.locality || "Unknown",
-      country: data.countryName || "Unknown",
-      state: data.principalSubdivision || null
+      city: city,
+      country: country,
+      state: state,
+      formatted: formatted
     });
   } catch (error) {
     console.error("Error:", error);
