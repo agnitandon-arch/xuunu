@@ -77,12 +77,17 @@ export const storage = {
   async createUser(user: any) {
     try {
       const db = getFirestoreDb();
+      // Clean user data - remove undefined values
+      const cleanUser = Object.fromEntries(
+        Object.entries(user).filter(([_, v]) => v !== undefined)
+      );
       const docRef = db.collection("users").doc(user.id);
-      await docRef.set({ ...user, createdAt: Timestamp.now() });
-      console.log("User created successfully:", user.id);
-      return { ...user, createdAt: new Date() };
-    } catch (error) {
+      await docRef.set({ ...cleanUser, createdAt: Timestamp.now() });
+      console.log("User created successfully:", user.id, "email:", user.email);
+      return { ...cleanUser, createdAt: new Date() };
+    } catch (error: any) {
       console.error("Error creating user:", error);
+      console.error("User data:", JSON.stringify(user, null, 2));
       throw error;
     }
   },
@@ -141,11 +146,19 @@ export const storage = {
   async createEnvironmentalReading(reading: any) {
     try {
       const db = getFirestoreDb();
-      const docRef = await db.collection("environmentalReadings").add({ ...reading, timestamp: Timestamp.now() });
-      console.log("Environmental reading created successfully:", docRef.id);
-      return { id: docRef.id, ...reading, timestamp: new Date() };
-    } catch (error) {
+      // Clean reading data - remove undefined values
+      const cleanReading = Object.fromEntries(
+        Object.entries(reading).filter(([_, v]) => v !== undefined)
+      );
+      const docRef = await db.collection("environmentalReadings").add({ 
+        ...cleanReading, 
+        timestamp: Timestamp.now() 
+      });
+      console.log("Environmental reading created successfully:", docRef.id, "for user:", reading.userId);
+      return { id: docRef.id, ...cleanReading, timestamp: new Date() };
+    } catch (error: any) {
       console.error("Error creating environmental reading:", error);
+      console.error("Reading data:", JSON.stringify(reading, null, 2));
       throw error;
     }
   },
