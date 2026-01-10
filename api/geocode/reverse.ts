@@ -14,14 +14,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { lat, lon } = req.query;
+    const { lat, lon, lng } = req.query;
+    // Support both 'lon' and 'lng' for compatibility
+    const longitude = lon || lng;
 
-    if (!lat || !lon) {
-      return res.status(400).json({ error: "lat and lon are required" });
+    if (!lat || !longitude) {
+      return res.status(400).json({ error: "lat and lng/lon are required" });
     }
 
     const response = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${longitude}&localityLanguage=en`
     );
 
     if (!response.ok) {
