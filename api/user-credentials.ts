@@ -28,8 +28,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     return res.status(405).json({ error: "Method not allowed" });
-  } catch (error) {
-    console.error("Error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+  } catch (error: any) {
+    console.error("User credentials API error:", error);
+    const errorMessage = error?.message || "Internal server error";
+    const statusCode = error?.message?.includes("FIREBASE_SERVICE_ACCOUNT_KEY") ? 503 : 500;
+    return res.status(statusCode).json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === "development" ? error?.stack : undefined
+    });
   }
 }

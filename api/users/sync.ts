@@ -32,8 +32,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     return res.json(user);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error syncing user:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    const errorMessage = error?.message || "Internal server error";
+    const statusCode = error?.message?.includes("FIREBASE_SERVICE_ACCOUNT_KEY") ? 503 : 500;
+    return res.status(statusCode).json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === "development" ? error?.stack : undefined
+    });
   }
 }

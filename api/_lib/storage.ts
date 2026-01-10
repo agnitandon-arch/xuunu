@@ -7,12 +7,33 @@ function getFirestoreDb(): Firestore {
   if (getApps().length === 0) {
     const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     if (!serviceAccountKey) {
+      console.error("FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set");
       throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY is required");
     }
-    const serviceAccount = JSON.parse(serviceAccountKey);
-    initializeApp({
-      credential: cert(serviceAccount),
-    });
+    
+    try {
+      const serviceAccount = JSON.parse(serviceAccountKey);
+      
+      // Validate required fields
+      if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
+        console.error("Invalid service account key: missing required fields");
+        throw new Error("Invalid service account key: missing required fields (project_id, private_key, or client_email)");
+      }
+      
+      initializeApp({
+        credential: cert(serviceAccount),
+        projectId: serviceAccount.project_id,
+      });
+      
+      console.log("Firebase Admin initialized successfully");
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY as JSON:", error.message);
+        throw new Error("Invalid FIREBASE_SERVICE_ACCOUNT_KEY format: must be valid JSON");
+      }
+      console.error("Failed to initialize Firebase Admin:", error);
+      throw error;
+    }
   }
   return getFirestore();
 }
@@ -49,10 +70,16 @@ export const storage = {
   },
 
   async createUser(user: any) {
-    const db = getFirestoreDb();
-    const docRef = db.collection("users").doc(user.id);
-    await docRef.set({ ...user, createdAt: Timestamp.now() });
-    return { ...user, createdAt: new Date() };
+    try {
+      const db = getFirestoreDb();
+      const docRef = db.collection("users").doc(user.id);
+      await docRef.set({ ...user, createdAt: Timestamp.now() });
+      console.log("User created successfully:", user.id);
+      return { ...user, createdAt: new Date() };
+    } catch (error) {
+      console.error("Error creating user:", error);
+      throw error;
+    }
   },
 
   async updateUser(id: string, updates: any) {
@@ -72,9 +99,15 @@ export const storage = {
   },
 
   async createHealthEntry(entry: any) {
-    const db = getFirestoreDb();
-    const docRef = await db.collection("healthEntries").add({ ...entry, timestamp: Timestamp.now() });
-    return { id: docRef.id, ...entry, timestamp: new Date() };
+    try {
+      const db = getFirestoreDb();
+      const docRef = await db.collection("healthEntries").add({ ...entry, timestamp: Timestamp.now() });
+      console.log("Health entry created successfully:", docRef.id);
+      return { id: docRef.id, ...entry, timestamp: new Date() };
+    } catch (error) {
+      console.error("Error creating health entry:", error);
+      throw error;
+    }
   },
 
   async getLatestHealthEntry(userId: string) {
@@ -93,9 +126,15 @@ export const storage = {
   },
 
   async createEnvironmentalReading(reading: any) {
-    const db = getFirestoreDb();
-    const docRef = await db.collection("environmentalReadings").add({ ...reading, timestamp: Timestamp.now() });
-    return { id: docRef.id, ...reading, timestamp: new Date() };
+    try {
+      const db = getFirestoreDb();
+      const docRef = await db.collection("environmentalReadings").add({ ...reading, timestamp: Timestamp.now() });
+      console.log("Environmental reading created successfully:", docRef.id);
+      return { id: docRef.id, ...reading, timestamp: new Date() };
+    } catch (error) {
+      console.error("Error creating environmental reading:", error);
+      throw error;
+    }
   },
 
   async getUserNotes(userId: string, limit: number = 50) {
@@ -213,14 +252,21 @@ export const storage = {
   },
 
   async upsertUserApiCredentials(userId: string, credentials: any) {
-    const db = getFirestoreDb();
-    const existing = await this.getUserApiCredentials(userId);
-    if (existing) {
-      await db.collection("userApiCredentials").doc(existing.id).update(credentials);
-      return { ...existing, ...credentials };
-    } else {
-      const docRef = await db.collection("userApiCredentials").add({ userId, ...credentials });
-      return { id: docRef.id, userId, ...credentials };
+    try {
+      const db = getFirestoreDb();
+      const existing = await this.getUserApiCredentials(userId);
+      if (existing) {
+        await db.collection("userApiCredentials").doc(existing.id).update(credentials);
+        console.log("User API credentials updated:", existing.id);
+        return { ...existing, ...credentials };
+      } else {
+        const docRef = await db.collection("userApiCredentials").add({ userId, ...credentials });
+        console.log("User API credentials created:", docRef.id);
+        return { id: docRef.id, userId, ...credentials };
+      }
+    } catch (error) {
+      console.error("Error upserting user API credentials:", error);
+      throw error;
     }
   }
 };
