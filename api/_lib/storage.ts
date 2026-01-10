@@ -106,11 +106,19 @@ export const storage = {
   async createHealthEntry(entry: any) {
     try {
       const db = getFirestoreDb();
-      const docRef = await db.collection("healthEntries").add({ ...entry, timestamp: Timestamp.now() });
-      console.log("Health entry created successfully:", docRef.id);
-      return { id: docRef.id, ...entry, timestamp: new Date() };
-    } catch (error) {
+      // Clean entry data - remove undefined values
+      const cleanEntry = Object.fromEntries(
+        Object.entries(entry).filter(([_, v]) => v !== undefined)
+      );
+      const docRef = await db.collection("healthEntries").add({ 
+        ...cleanEntry, 
+        timestamp: Timestamp.now() 
+      });
+      console.log("Health entry created successfully:", docRef.id, "for user:", entry.userId);
+      return { id: docRef.id, ...cleanEntry, timestamp: new Date() };
+    } catch (error: any) {
       console.error("Error creating health entry:", error);
+      console.error("Entry data:", JSON.stringify(entry, null, 2));
       throw error;
     }
   },
