@@ -111,10 +111,49 @@ export const storage = {
   async createHealthEntry(entry: any) {
     try {
       const db = getFirestoreDb();
-      // Clean entry data - remove undefined values
-      const cleanEntry = Object.fromEntries(
-        Object.entries(entry).filter(([_, v]) => v !== undefined)
-      );
+      
+      // Clean and convert entry data - ensure proper types
+      const cleanEntry: any = {};
+      
+      // Required fields
+      if (entry.userId) cleanEntry.userId = String(entry.userId);
+      
+      // Numeric fields - convert to numbers or null
+      if (entry.glucose !== undefined && entry.glucose !== null) {
+        cleanEntry.glucose = Number(entry.glucose);
+      }
+      if (entry.heartRate !== undefined && entry.heartRate !== null) {
+        cleanEntry.heartRate = Number(entry.heartRate);
+      }
+      if (entry.hrv !== undefined && entry.hrv !== null) {
+        cleanEntry.hrv = Number(entry.hrv);
+      }
+      if (entry.bloodPressureSystolic !== undefined && entry.bloodPressureSystolic !== null) {
+        cleanEntry.bloodPressureSystolic = Number(entry.bloodPressureSystolic);
+      }
+      if (entry.bloodPressureDiastolic !== undefined && entry.bloodPressureDiastolic !== null) {
+        cleanEntry.bloodPressureDiastolic = Number(entry.bloodPressureDiastolic);
+      }
+      if (entry.symptomSeverity !== undefined && entry.symptomSeverity !== null) {
+        cleanEntry.symptomSeverity = Number(entry.symptomSeverity);
+      }
+      if (entry.sleepHours !== undefined && entry.sleepHours !== null) {
+        cleanEntry.sleepHours = Number(entry.sleepHours);
+      }
+      if (entry.steps !== undefined && entry.steps !== null) {
+        cleanEntry.steps = Number(entry.steps);
+      }
+      
+      // Array fields
+      if (entry.symptoms && Array.isArray(entry.symptoms) && entry.symptoms.length > 0) {
+        cleanEntry.symptoms = entry.symptoms;
+      }
+      
+      // String fields
+      if (entry.notes !== undefined && entry.notes !== null && entry.notes !== "") {
+        cleanEntry.notes = String(entry.notes);
+      }
+      
       const docRef = await db.collection("healthEntries").add({ 
         ...cleanEntry, 
         timestamp: Timestamp.now() 
@@ -146,10 +185,38 @@ export const storage = {
   async createEnvironmentalReading(reading: any) {
     try {
       const db = getFirestoreDb();
-      // Clean reading data - remove undefined values
-      const cleanReading = Object.fromEntries(
-        Object.entries(reading).filter(([_, v]) => v !== undefined)
-      );
+      
+      // Clean and convert reading data - ensure proper types
+      const cleanReading: any = {};
+      
+      // Required fields
+      if (reading.userId) cleanReading.userId = String(reading.userId);
+      if (reading.locationMode) cleanReading.locationMode = String(reading.locationMode);
+      
+      // Numeric fields - convert to numbers
+      const numericFields = [
+        'aqi', 'pm25', 'pm10', 'so2', 'no2', 'nox', 'co', 'o3', 'vocs', 'radon',
+        'noiseLevel', 'noisePeak', 'noiseAverage',
+        'waterQuality', 'waterPh', 'waterTurbidity', 'waterChlorine', 'waterLead', 'waterBacteria',
+        'soilContaminants', 'soilHeavyMetals', 'soilMoisture', 'soilPh',
+        'uvIndex', 'lightPollution', 'illuminance', 'blueLight',
+        'temperature', 'humidity', 'heatIndex', 'pressure',
+        'gammaRadiation', 'cosmicRays'
+      ];
+      
+      numericFields.forEach(field => {
+        if (reading[field] !== undefined && reading[field] !== null && reading[field] !== '') {
+          const numValue = Number(reading[field]);
+          if (!isNaN(numValue)) {
+            cleanReading[field] = numValue;
+          }
+        }
+      });
+      
+      // String fields
+      if (reading.location) cleanReading.location = String(reading.location);
+      if (reading.notes) cleanReading.notes = String(reading.notes);
+      
       const docRef = await db.collection("environmentalReadings").add({ 
         ...cleanReading, 
         timestamp: Timestamp.now() 

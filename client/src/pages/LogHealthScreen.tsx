@@ -8,12 +8,16 @@ import { Card } from "@/components/ui/card";
 import { Loader2, CheckCircle } from "lucide-react";
 import SymptomSeveritySlider from "@/components/SymptomSeveritySlider";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface LogHealthScreenProps {
   onSave?: () => void;
 }
 
 export default function LogHealthScreen({ onSave }: LogHealthScreenProps) {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [glucose, setGlucose] = useState("");
   const [severity, setSeverity] = useState(5);
   const [symptoms, setSymptoms] = useState<string[]>([]);
@@ -33,14 +37,64 @@ export default function LogHealthScreen({ onSave }: LogHealthScreenProps) {
   };
 
   const handleSave = async () => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Please sign in to save health data",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!glucose || isNaN(Number(glucose))) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid glucose value",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setShowSuccess(true);
-    setTimeout(() => {
-      setShowSuccess(false);
-      if (onSave) onSave();
-    }, 2000);
+    try {
+      const payload = {
+        userId: user.uid,
+        glucose: Number(glucose), // Convert to number
+        symptomSeverity: Number(severity), // Ensure number
+        symptoms: symptoms.length > 0 ? symptoms : undefined, // Only include if not empty
+        notes: notes.trim() || null,
+      };
+
+      const response = await fetch("/api/health-entries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to save health entry");
+      }
+
+      setIsLoading(false);
+      setShowSuccess(true);
+      toast({
+        title: "Success",
+        description: "Health entry saved successfully",
+      });
+      setTimeout(() => {
+        setShowSuccess(false);
+        if (onSave) onSave();
+      }, 2000);
+    } catch (error) {
+      console.error("Error saving health entry:", error);
+      setIsLoading(false);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save health entry. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (showSuccess) {

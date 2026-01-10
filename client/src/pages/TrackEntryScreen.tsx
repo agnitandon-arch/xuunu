@@ -41,10 +41,10 @@ export default function TrackEntryScreen({ onSave }: TrackEntryScreenProps) {
     try {
       const payload = {
         userId: user.uid,
-        glucose,
-        symptomSeverity: severity,
-        symptoms,
-        notes: notes || null,
+        glucose: Number(glucose), // Ensure number type
+        symptomSeverity: Number(severity), // Ensure number type
+        symptoms: symptoms.length > 0 ? symptoms : undefined, // Only include if not empty
+        notes: notes.trim() || null,
       };
 
       const response = await fetch("/api/health-entries", {
